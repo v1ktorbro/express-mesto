@@ -13,12 +13,14 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    required: true,
+    required: [true, 'Введите ссылку в формате http(s)://'],
     validate: {
       validator(value) {
-        return value !== /https?:\/{2}\S+/gi;
+        return /https?:\/{2}\S+/gi.test(value);
       },
-      message: 'Ссылка должна иметь такой формат: http(s)://....',
+      message: (props) => {
+        return `Ссылка ${props.value} введена не верна.`;
+      },
     },
   },
 });
