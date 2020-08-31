@@ -1,33 +1,37 @@
-const express = require('express');
-const fs = require('fs').promises;
-const path = require('path');
+const router = require('express').Router();
 
-const cards = path.join(__dirname, '..', 'data', 'cards.json');
-
-const router = express.Router();
+const Card = require('../models/card');
 
 router.get('/', (req, res) => {
-  fs.readFile(cards, { encoding: 'utf8' }).then((data) => {
-    return res.status(200).send(JSON.parse(data));
+  Card.find({}).then((cards) => {
+    return res.status(200).send(cards);
   }).catch((err) => {
     console.log(err);
     return res.status(500).send('Ошибка на стороне сервера');
   });
 });
 
-router.get('/:id', (req, res) => {
-  fs.readFile(cards, { encoding: 'utf8' }).then((data) => {
-    const card = JSON.parse(data).find((eachCard) => {
-      return eachCard._id === req.params.id;
-    });
-    if (!card) {
-      return res.status(404).send({ error: 'Такой карточки нет' });
-    }
-    return res.send(card);
-  }).catch((err) => {
+router.post('/', async (req, res) => {
+  const { name, link } = req.body;
+  try {
+    const card = await Card.create({ name, link, owner: req.user._id });
+    res.status(200).send(`Запрос выполнен. Карточка ${card} создана.`);
+  } catch (err) {
     console.log(err);
-    return res.status(500).send('Ошибка на стороне сервера');
-  });
+    return res.status(404).send(err.message);
+  }
+  return console.log(`Запрос записи в БД карточки: "${req.body.name}" выполнен.`);
+});
+
+router.delete('/:id', async (req, res) => {
+  console.log(req.params.id);
+  try {
+    const card = await Card.findByIdAndRemove(req.params.id);
+    res.status(200).send(`Карточка "${card.name}" удалена.`);
+  } catch (err) {
+    console.log(err);
+    res.status(404).send(err.message);
+  }
 });
 
 module.exports = router;

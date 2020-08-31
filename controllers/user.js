@@ -29,5 +29,5 @@ module.exports.createUser = async (req, res) => {
   } catch (error) {
     return res.status(404).send(error.message);
   }
-  return console.log(`Запрос записи в БД пользователя: ${req.body.name} выполнен.`);
+  return console.log(`Запрос записи в БД пользователя: "${req.body.name}" выполнен.`);
 };
