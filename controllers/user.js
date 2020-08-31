@@ -25,7 +25,7 @@ module.exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
   try {
     const user = await User.create({ name, about, avatar });
-    res.status(200).send(`Запрос выполнен. Пользователь ${user.name} создан`);
+    res.status(200).send(`Запрос выполнен. Пользователь ${user} создан`);
   } catch (error) {
     return res.status(404).send(error.message);
   }

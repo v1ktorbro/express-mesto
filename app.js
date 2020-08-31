@@ -20,6 +20,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/users', usersRouter);
+app.use((req, res, next) => {
+  req.user = {
+    _id: '5f4a526ab8923e11008a862e',
+  };
+  next();
+});
 app.use('/cards', cardsRouter);
 
 app.get('*', (req, res) => {
