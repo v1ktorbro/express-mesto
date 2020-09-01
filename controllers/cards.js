@@ -16,7 +16,7 @@ module.exports.createCard = async (req, res) => {
     res.status(200).send(`Запрос выполнен. Карточка ${card} создана.`);
   } catch (err) {
     console.log(err);
-    return res.status(404).send(err.message);
+    return res.status(404).send(`Что-то пошло не так: ${err.message}`);
   }
   return console.log(`Запрос записи в БД карточки: "${req.body.name}" выполнен.`);
 };
@@ -27,6 +27,18 @@ module.exports.deleteCard = async (req, res) => {
     res.status(200).send(`Карточка "${card.name}" удалена.`);
   } catch (err) {
     console.log(err);
-    res.status(404).send(err.message);
+    res.status(404).send(`Что-то пошло не так: ${err.message}`);
+  }
+};
+
+module.exports.putLikeCard = async (req, res) => {
+  try {
+    const card = await Card.findByIdAndUpdate(req.params.id,
+      { $addToSet: { likes: req.user._id } },
+      { new: true });
+    res.status(200).send(`Лайк карточке ${card.name} успешно поставлен.`);
+  } catch (err) {
+    console.log(err);
+    res.status(404).send(`Что-то пошло не так: ${err.message}`);
   }
 };
