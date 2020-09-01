@@ -5,7 +5,7 @@ module.exports.getAllUsers = (req, res) => {
     return res.status(200).send(users);
   }).catch((err) => {
     console.log(err);
-    return res.status(500).send('Ошибка на стороне сервера');
+    return res.status(500).send(`Что-то пошло не так: ${err.message}`);
   });
 };
 
@@ -17,7 +17,7 @@ module.exports.getUser = (req, res) => {
     return res.status(200).send(user);
   }).catch((err) => {
     console.log(err);
-    return res.status(500).send('Ошибка на стороне сервера');
+    return res.status(500).send(`Что-то пошло не так: ${err.message}`);
   });
 };
 
@@ -27,7 +27,7 @@ module.exports.createUser = async (req, res) => {
     const user = await User.create({ name, about, avatar });
     res.status(200).send(`Запрос выполнен. Пользователь ${user} создан`);
   } catch (err) {
-    return res.status(404).send(err.message);
+    return res.status(404).send(`Что-то пошло не так: ${err.message}`);
   }
   return console.log(`Запрос записи в БД пользователя: "${req.body.name}" выполнен.`);
 };
@@ -38,7 +38,18 @@ module.exports.updInfoProfile = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { name, about });
     res.status(200).send('Данные профиля обновлены.');
   } catch (err) {
-    return res.status(404).send(err.message);
+    return res.status(404).send(`Что-то пошло не так: ${err.message}`);
   }
-  return console.log('Запрос на обновления профиля успешно выполнен.');
+  return console.log('Запрос на обновление профиля успешно выполнен.');
+};
+
+module.exports.updAvatar = async (req, res) => {
+  const { avatar } = req.body;
+  try {
+    await User.findByIdAndUpdate(req.user._id, { avatar });
+    res.status(200).send('Аватар успешно обновлен');
+  } catch (err) {
+    return res.status(404).send(`Что-то пошло не так: ${err.message}`);
+  }
+  return console.log('Запрос на обновление аватара успешно выполнен.');
 };
