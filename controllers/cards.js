@@ -42,3 +42,15 @@ module.exports.putLikeCard = async (req, res) => {
     res.status(404).send(`Что-то пошло не так: ${err.message}`);
   }
 };
+
+module.exports.deleteLikeCard = async (req, res) => {
+  try {
+    const card = await Card.findByIdAndUpdate(req.params.id,
+      { $pull: { likes: req.user._id } },
+      { new: true });
+    res.status(200).send(`Вы удалили лайк у карточки ${card.name}`);
+  } catch (err) {
+    console.log(err);
+    res.status(404).send(`Что-то пошло не так: ${err.message}`);
+  }
+};
