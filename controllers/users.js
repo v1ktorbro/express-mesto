@@ -35,8 +35,10 @@ module.exports.createUser = async (req, res) => {
 module.exports.updInfoProfile = async (req, res) => {
   const { name, about } = req.body;
   try {
-    await User.findByIdAndUpdate(req.user._id, { name, about });
-    res.status(200).send('Данные профиля обновлены.');
+    await User.findByIdAndUpdate(req.user._id,
+      { name, about },
+      { new: true, runValidators: true });
+    res.status(200).send('Данные профиля успешно обновлены.');
   } catch (err) {
     return res.status(404).send(`Что-то пошло не так: ${err.message}`);
   }
@@ -46,7 +48,9 @@ module.exports.updInfoProfile = async (req, res) => {
 module.exports.updAvatar = async (req, res) => {
   const { avatar } = req.body;
   try {
-    await User.findByIdAndUpdate(req.user._id, { avatar });
+    await User.findByIdAndUpdate(req.user._id,
+      { avatar },
+      { new: true, runValidators: true });
     res.status(200).send('Аватар успешно обновлен');
   } catch (err) {
     return res.status(404).send(`Что-то пошло не так: ${err.message}`);
