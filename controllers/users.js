@@ -26,8 +26,19 @@ module.exports.createUser = async (req, res) => {
   try {
     const user = await User.create({ name, about, avatar });
     res.status(200).send(`Запрос выполнен. Пользователь ${user} создан`);
-  } catch (error) {
-    return res.status(404).send(error.message);
+  } catch (err) {
+    return res.status(404).send(err.message);
   }
   return console.log(`Запрос записи в БД пользователя: "${req.body.name}" выполнен.`);
+};
+
+module.exports.updInfoProfile = async (req, res) => {
+  const { name, about } = req.body;
+  try {
+    await User.findByIdAndUpdate(req.user._id, { name, about });
+    res.status(200).send('Данные профиля обновлены.');
+  } catch (err) {
+    return res.status(404).send(err.message);
+  }
+  return console.log('Запрос на обновления профиля успешно выполнен.');
 };
