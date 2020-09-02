@@ -2,22 +2,22 @@ const User = require('../models/user');
 
 module.exports.getAllUsers = (req, res) => {
   User.find({}).then((users) => {
-    return res.status(200).send(users);
+    res.status(200).send(users);
   }).catch((err) => {
     console.log(err);
-    return res.status(500).send(`Что-то пошло не так: ${err.message}`);
+    res.status(err.message ? 404 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
   });
 };
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.id).then((user) => {
     if (!user) {
-      return res.status(404).send({ message: 'Нет пользователя с таким id' });
+      res.status(404).send({ message: 'Нет пользователя с таким id' });
     }
-    return res.status(200).send(user);
+    res.status(200).send(user);
   }).catch((err) => {
     console.log(err);
-    return res.status(500).send(`Что-то пошло не так: ${err.message}`);
+    res.status(err.message ? 404 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
   });
 };
 
@@ -27,9 +27,8 @@ module.exports.createUser = async (req, res) => {
     const user = await User.create({ name, about, avatar });
     res.status(200).send(`Запрос выполнен. Пользователь ${user} создан`);
   } catch (err) {
-    return res.status(404).send(`Что-то пошло не так: ${err.message}`);
+    res.status(err.message ? 400 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
   }
-  return console.log(`Запрос записи в БД пользователя: "${req.body.name}" выполнен.`);
 };
 
 module.exports.updInfoProfile = async (req, res) => {
@@ -40,9 +39,8 @@ module.exports.updInfoProfile = async (req, res) => {
       { new: true, runValidators: true });
     res.status(200).send('Данные профиля успешно обновлены.');
   } catch (err) {
-    return res.status(404).send(`Что-то пошло не так: ${err.message}`);
+    res.status(err.message ? 400 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
   }
-  return console.log('Запрос на обновление профиля успешно выполнен.');
 };
 
 module.exports.updAvatar = async (req, res) => {
@@ -53,7 +51,6 @@ module.exports.updAvatar = async (req, res) => {
       { new: true, runValidators: true });
     res.status(200).send('Аватар успешно обновлен');
   } catch (err) {
-    return res.status(404).send(`Что-то пошло не так: ${err.message}`);
+    res.status(err.message ? 400 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
   }
-  return console.log('Запрос на обновление аватара успешно выполнен.');
 };
