@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 
 const { PORT = 3000 } = process.env;
@@ -7,6 +8,11 @@ const { usersRouter } = require('./routes');
 const { cardsRouter } = require('./routes');
 
 const app = express();
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 99,
+  message: 'За последние 15 минут Вами сделано не менее 100 запросов. В целях защиты системы от DoS-атак, пожалуйста, повторите запрос позже.',
+});
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -21,6 +27,7 @@ app.use((req, res, next) => {
   };
   next();
 });
+app.use(limiter);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 app.get('*', (req, res) => {
