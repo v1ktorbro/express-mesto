@@ -26,9 +26,12 @@ module.exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
   try {
     const user = await User.create({ name, about, avatar });
-    return res.status(200).send(`Запрос выполнен. Пользователь ${user} создан`);
+    return res.status(200).send(`${user}`);
   } catch (err) {
-    return res.status(err.message ? 400 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    return res.status(500).send({ message: 'На сервере произошла ошибка.' });
   }
 };
 
