@@ -1,13 +1,13 @@
 const User = require('../models/user');
 const NotFound = require('../errors/NotFound');
 
-module.exports.getAllUsers = (req, res) => {
+module.exports.getAllUsers = (req, res, next) => {
   User.find({}).then((users) => {
+    if (!users) {
+      throw new NotFound('Не удается загрузить список пользователей');
+    }
     return res.status(200).send(users);
-  }).catch((err) => {
-    console.log(err);
-    return res.status(err.message ? 404 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
-  });
+  }).catch(next);
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -19,45 +19,33 @@ module.exports.getUser = (req, res, next) => {
   }).catch(next);
 };
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
-  try {
-    const user = await User.create({ name, about, avatar });
-    return res.status(200).send(`${user}`);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные.' });
-    }
-    return res.status(500).send({ message: 'На сервере произошла ошибка.' });
-  }
+  User.create({ name, about, avatar }).then((user) => {
+    return res.status(201).send(`${user}`);
+  }).catch(next);
 };
 
-module.exports.updInfoProfile = async (req, res) => {
+module.exports.updInfoProfile = (req, res, next) => {
   const { name, about } = req.body;
-  try {
-    await User.findByIdAndUpdate(req.user._id,
-      { name, about },
-      { new: true, runValidators: true }).orFail(new Error('NotValidId'));
-    return res.status(200).send('Данные профиля успешно обновлены.');
-  } catch (err) {
-    if (err.message === 'NotValidId') {
-      return res.status(404).send({ message: 'Неправильно передан id пользователя' });
+  User.findByIdAndUpdate(req.user._id,
+    { name, about },
+    { new: true, runValidators: true }).then((user) => {
+    if (!user) {
+      throw new NotFound('Неправильно передан id пользователя');
     }
-    return res.status(err.message ? 400 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
-  }
+    return res.status(200).send('Данные профиля успешно обновлены.');
+  }).catch(next);
 };
 
-module.exports.updAvatar = async (req, res) => {
+module.exports.updAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  try {
-    await User.findByIdAndUpdate(req.user._id,
-      { avatar },
-      { new: true, runValidators: true }).orFail(new Error('NotValidId'));
-    return res.status(200).send('Аватар успешно обновлен');
-  } catch (err) {
-    if (err.message === 'NotValidId') {
-      return res.status(404).send({ message: 'Неправильно передан id пользователя' });
+  User.findByIdAndUpdate(req.user._id,
+    { avatar },
+    { new: true, runValidators: true }).then((user) => {
+    if (!user) {
+      throw new NotFound('Неправильно передан id пользователя');
     }
-    return res.status(err.message ? 400 : 500).send({ message: err.message || 'На сервере произошла ошибка.' });
-  }
+    return res.status(200).send('Аватар успешно обновлен');
+  }).catch(next);
 };

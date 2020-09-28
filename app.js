@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 const { usersRouter } = require('./routes');
@@ -34,9 +35,10 @@ app.get('*', (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 app.disable('etag');
-app.use((err, req, res, next) => {
+app.use(errors());
+app.use((err, req, res) => {
   const { statusCode = 500, message } = err;
-  //console.log(err)
+  //console.log(err);
   res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
 });
 app.listen(PORT, () => {
