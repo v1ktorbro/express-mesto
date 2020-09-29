@@ -7,6 +7,7 @@ const { errors } = require('celebrate');
 const { PORT = 3000 } = process.env;
 const { usersRouter } = require('./routes');
 const { cardsRouter } = require('./routes');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 const limiter = rateLimit({
@@ -29,8 +30,10 @@ app.use((req, res, next) => {
   next();
 });
 app.use(limiter);
+app.use(requestLogger);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
+app.use(errorLogger);
 app.get('*', (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
