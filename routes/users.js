@@ -9,6 +9,8 @@ router.get('/:id', getUser);
 
 router.post('/', celebrate({
   body: Joi.object({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
     name: Joi.string().min(2).max(30).required(),
     about: Joi.string().required(),
     avatar: Joi.string().regex(/https?:\/{2}\S+/).required(),

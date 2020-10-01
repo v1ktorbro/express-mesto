@@ -1,6 +1,24 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+const BadRequest = require('../errors/BadRequest');
 
 const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    validate: {
+      validator(value) {
+        return validator.isEmail(value);
+      },
+      message: (error) => {
+        return `${error.value} не является e-mail адресом`;
+      },
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
