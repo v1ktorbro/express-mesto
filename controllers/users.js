@@ -4,6 +4,21 @@ const User = require('../models/user');
 const NotFound = require('../errors/NotFound');
 const Unauthorize = require('../errors/Unauthorized');
 
+module.exports.registerUser = (req, res, next) => {
+  const { email, password } = req.body;
+  bcrypt.hash(password, 10).then((hash) => {
+    User.create({
+      email,
+      password: hash,
+      name: 'Заполните имя',
+      about: 'Напишите немного о себе',
+      avatar: 'https://...',
+    }).then((user) => {
+      return res.status(201).send(user);
+    }).catch(next);
+  });
+};
+
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).then((user) => {
@@ -15,7 +30,7 @@ module.exports.login = (req, res, next) => {
         throw new Unauthorize('Пароль и/или почта введены неверно');
       }
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '1d' });
-      return res.cookie('jwt', token, {
+      return res.status(200).cookie('jwt', token, {
         maxAge: 360000 * 24,
         httpOnly: true,
       }).end();
@@ -39,19 +54,6 @@ module.exports.getUser = (req, res, next) => {
     }
     return res.status(200).send(user);
   }).catch(next);
-};
-
-module.exports.createUser = (req, res, next) => {
-  const {
-    email, password, name, about, avatar,
-  } = req.body;
-  bcrypt.hash(password, 10).then((hash) => {
-    User.create({
-      email, password: hash, name, about, avatar,
-    }).then((user) => {
-      return res.status(201).send({ _id: user._id, email: user.email });
-    }).catch(next);
-  });
 };
 
 module.exports.updInfoProfile = (req, res, next) => {

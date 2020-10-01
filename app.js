@@ -7,6 +7,7 @@ const { errors } = require('celebrate');
 const { PORT = 3000 } = process.env;
 const { usersRouter } = require('./routes');
 const { cardsRouter } = require('./routes');
+const { login, registerUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
@@ -34,6 +35,8 @@ app.use(requestLogger);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 app.use(errorLogger);
+app.post('/users/signin', login);
+app.post('/users/signup', registerUser);
 app.get('*', (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
@@ -41,8 +44,7 @@ app.disable('etag');
 app.use(errors());
 app.use((err, req, res) => {
   const { statusCode = 500, message } = err;
-  //console.log(err);
-  res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+  return res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
 });
 app.listen(PORT, () => {
   console.log(`PORT раздается на сервере ${PORT}`);
