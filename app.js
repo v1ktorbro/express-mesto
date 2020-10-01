@@ -1,4 +1,5 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
@@ -9,8 +10,10 @@ const { usersRouter } = require('./routes');
 const { cardsRouter } = require('./routes');
 const { login, registerUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { authorization } = require('./middlewares/auth');
 
 const app = express();
+app.use(cookieParser());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 99,
@@ -32,13 +35,13 @@ app.use((req, res, next) => {
 });
 app.use(limiter);
 app.use(requestLogger);
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
-app.use(errorLogger);
 app.post('/users/signin', login);
 app.post('/users/signup', registerUser);
+app.use('/users', authorization, usersRouter);
+app.use('/cards', authorization, cardsRouter);
+app.use(errorLogger);
 app.get('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+  return res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 app.disable('etag');
 app.use(errors());
