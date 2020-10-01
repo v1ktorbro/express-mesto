@@ -1,6 +1,22 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const NotFound = require('../errors/NotFound');
+const Unauthorize = require('../errors/Unauthorized');
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).then((user) => {
+    if (!user) {
+      throw new Unauthorize('Пароль и/или почта введены неверно');
+    }
+    return bcrypt.compare(password, user.password);
+  }).then((matched) => {
+    if (!matched) {
+      throw new Unauthorize('Пароль и/или почта введены неверно');
+    }
+    return res.send({ message: 'Welcome!' });
+  }).catch(next);
+};
 
 module.exports.getAllUsers = (req, res, next) => {
   User.find({}).then((users) => {
