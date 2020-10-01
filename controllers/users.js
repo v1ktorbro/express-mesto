@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFound = require('../errors/NotFound');
 const Unauthorize = require('../errors/Unauthorized');
@@ -9,12 +10,16 @@ module.exports.login = (req, res, next) => {
     if (!user) {
       throw new Unauthorize('Пароль и/или почта введены неверно');
     }
-    return bcrypt.compare(password, user.password);
-  }).then((matched) => {
-    if (!matched) {
-      throw new Unauthorize('Пароль и/или почта введены неверно');
-    }
-    return res.send({ message: 'Welcome!' });
+    return bcrypt.compare(password, user.password).then((matched) => {
+      if (!matched) {
+        throw new Unauthorize('Пароль и/или почта введены неверно');
+      }
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '1d' });
+      return res.cookie('jwt', token, {
+        maxAge: 360000 * 24,
+        httpOnly: true,
+      }).end();
+    });
   }).catch(next);
 };
 
