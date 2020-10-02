@@ -1,10 +1,6 @@
-const jwt = require('jsonwebtoken');
 const Card = require('../models/card');
 const NotFound = require('../errors/NotFound');
-
-const getOwnerId = (req) => {
-  return jwt.decode(req.cookies.jwt, { complete: true }).payload._id;
-};
+const { getUserId } = require('../middlewares/auth');
 
 module.exports.getAllCards = (req, res, next) => {
   Card.find({}).then((cards) => {
@@ -17,14 +13,14 @@ module.exports.getAllCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const idOwner = getOwnerId(req);
+  const idOwner = getUserId(req);
   Card.create({ name, link, owner: idOwner }).then((card) => {
     return res.status(201).send(`${card}`);
   }).catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  const idOwner = getOwnerId(req);
+  const idOwner = getUserId(req);
   const idDeleteCard = req.params.id;
   Card.findOne({ _id: idDeleteCard }).then((currentCard) => {
     if (!currentCard) {
