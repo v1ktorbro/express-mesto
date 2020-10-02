@@ -5,6 +5,8 @@ const NotFound = require('../errors/NotFound');
 const Unauthorize = require('../errors/Unauthorized');
 const { getUserId } = require('../middlewares/auth');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports.registerUser = (req, res, next) => {
   const { email, password } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
@@ -30,7 +32,9 @@ module.exports.login = (req, res, next) => {
       if (!matched) {
         throw new Unauthorize('Пароль и/или почта введены неверно');
       }
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '1d' });
+      const token = jwt.sign({ _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '1d' });
       return res.status(200).cookie('jwt', token, {
         maxAge: 360000 * 24,
         httpOnly: true,
