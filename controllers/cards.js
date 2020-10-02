@@ -1,5 +1,10 @@
+const jwt = require('jsonwebtoken');
 const Card = require('../models/card');
 const NotFound = require('../errors/NotFound');
+
+const getOwnerId = (req) => {
+  return jwt.decode(req.cookies.jwt, { complete: true }).payload._id;
+};
 
 module.exports.getAllCards = (req, res, next) => {
   Card.find({}).then((cards) => {
@@ -12,17 +17,25 @@ module.exports.getAllCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  Card.create({ name, link, owner: req.user._id }).then((result) => {
-    return res.status(201).send(`${result}`);
+  const idOwner = getOwnerId(req);
+  Card.create({ name, link, owner: idOwner }).then((card) => {
+    return res.status(201).send(`${card}`);
   }).catch(next);
 };
 
-module.exports.deleteCard = async (req, res, next) => {
-  Card.deleteOne({ _id: req.params.id }).then((card) => {
-    if (!card.n) {
+module.exports.deleteCard = (req, res, next) => {
+  const idOwner = getOwnerId(req);
+  const idDeleteCard = req.params.id;
+  Card.findOne({ _id: idDeleteCard }).then((currentCard) => {
+    if (!currentCard) {
       throw new NotFound('Карточка не существует, либо уже была удалена.');
     }
-    return res.status(200).send('Карточка удалена.');
+    if (currentCard.owner.toString() !== idOwner) {
+      throw new NotFound('Вы не можете удалять чужую карточку');
+    }
+    return Card.deleteOne({ _id: idDeleteCard }).then(() => {
+      return res.status(200).send('Карточка удалена.');
+    });
   }).catch(next);
 };
 
