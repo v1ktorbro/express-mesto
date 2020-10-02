@@ -22,7 +22,7 @@ module.exports.registerUser = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email }).then((user) => {
+  User.findOne({ email }).select('+password').then((user) => {
     if (!user) {
       throw new Unauthorize('Пароль и/или почта введены неверно');
     }

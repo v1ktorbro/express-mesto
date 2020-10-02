@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const BadRequest = require('../errors/BadRequest');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -18,6 +17,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    select: false,
   },
   name: {
     type: String,
