@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFound = require('../errors/NotFound');
 const Unauthorize = require('../errors/Unauthorized');
+const { getUserId } = require('../middlewares/auth');
 
 module.exports.registerUser = (req, res, next) => {
   const { email, password } = req.body;
@@ -33,7 +34,7 @@ module.exports.login = (req, res, next) => {
       return res.status(200).cookie('jwt', token, {
         maxAge: 360000 * 24,
         httpOnly: true,
-      }).end();
+      }).send({ message: `Привет, ${user.name}!` }).end();
     });
   }).catch(next);
 };
@@ -58,7 +59,8 @@ module.exports.getUser = (req, res, next) => {
 
 module.exports.updInfoProfile = (req, res, next) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id,
+  const userId = getUserId(req);
+  User.findByIdAndUpdate(userId,
     { name, about },
     { new: true, runValidators: true }).then((user) => {
     if (!user) {
@@ -70,7 +72,8 @@ module.exports.updInfoProfile = (req, res, next) => {
 
 module.exports.updAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id,
+  const userId = getUserId(req);
+  User.findByIdAndUpdate(userId,
     { avatar },
     { new: true, runValidators: true }).then((user) => {
     if (!user) {
