@@ -30,6 +30,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(limiter);
 app.use(requestLogger);
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадет');
+  }, 0);
+});
 app.post('/users/signin', login);
 app.post('/users/signup', registerUser);
 app.use('/users', authorization, usersRouter);
