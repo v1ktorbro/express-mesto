@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const Unauthorized = require('../errors/Unauthorized');
 
 module.exports.authorization = (req, res, next) => {
@@ -6,4 +7,8 @@ module.exports.authorization = (req, res, next) => {
     throw new Unauthorized('Для продолжения необходимо авторизоваться');
   }
   return next();
+};
+
+module.exports.getUserId = (req) => {
+  return jwt.decode(req.cookies.jwt, { complete: true }).payload._id;
 };
