@@ -13,20 +13,18 @@ module.exports.getAllCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const idOwner = getUserId(req);
-  Card.create({ name, link, owner: idOwner }).then((card) => {
+  Card.create({ name, link, owner: getUserId(req) }).then((card) => {
     return res.status(201).send(`${card}`);
   }).catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  const idOwner = getUserId(req);
   const idDeleteCard = req.params.id;
   Card.findOne({ _id: idDeleteCard }).then((currentCard) => {
     if (!currentCard) {
       throw new NotFound('Карточка не существует, либо уже была удалена.');
     }
-    if (currentCard.owner.toString() !== idOwner) {
+    if (currentCard.owner.toString() !== getUserId(req)) {
       throw new NotFound('Вы не можете удалять чужую карточку');
     }
     return Card.deleteOne({ _id: idDeleteCard }).then(() => {
@@ -37,7 +35,7 @@ module.exports.deleteCard = (req, res, next) => {
 
 module.exports.putLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.id,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: getUserId(req) } },
     { new: true }).then((findCard) => {
     if (!findCard) {
       throw new NotFound('Вы не можете поставить лайк — карточки не существует.');
@@ -48,7 +46,7 @@ module.exports.putLikeCard = (req, res, next) => {
 
 module.exports.deleteLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.id,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: getUserId(req) } },
     { new: true }).then((findCard) => {
     if (!findCard) {
       throw new NotFound('Вы не можете удалить лайк — карточки не существует.');
