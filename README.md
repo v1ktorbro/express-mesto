@@ -1,8 +1,8 @@
 # Бэкэнд для проекта [Место Russia](https://v1ktorbro.github.io/react-mesto-api-full/index.html)
 
-**_http_ [130.193.58.31](http://130.193.58.31/users)**
-**_http_ [v1ktorbro.students.nomoreparties.co](http://v1ktorbro.students.nomoreparties.co/users)**
-**_https_ [v1ktorbro.students.nomoreparties.co](https://v1ktorbro.students.nomoreparties.co/users)**
+* **_http_ [130.193.58.31](http://130.193.58.31/users)**
+* **_http_ [v1ktorbro.students.nomoreparties.co](http://v1ktorbro.students.nomoreparties.co/users)**
+* **_https_ [v1ktorbro.students.nomoreparties.co](https://v1ktorbro.students.nomoreparties.co/users)**
 
 ## Используемый стэк :
 
