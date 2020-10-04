@@ -4,22 +4,28 @@ const User = require('../models/user');
 const NotFound = require('../errors/NotFound');
 const Unauthorize = require('../errors/Unauthorized');
 const { getUserId } = require('../middlewares/auth');
+const EmailError = require('../errors/EmailError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.registerUser = (req, res, next) => {
   const { email, password } = req.body;
-  bcrypt.hash(password, 10).then((hash) => {
-    User.create({
-      email,
-      password: hash,
-      name: 'Заполните имя',
-      about: 'Напишите немного о себе',
-      avatar: 'https://...',
-    }).then((user) => {
-      return res.status(201).send(user);
-    }).catch(next);
-  });
+  User.findOne({ email }).then((findEmail) => {
+    if (findEmail) {
+      throw new EmailError(`${findEmail.email} уже зарегистрирован`);
+    }
+    return bcrypt.hash(password, 10).then((hash) => {
+      User.create({
+        email,
+        password: hash,
+        name: 'Заполните имя',
+        about: 'Напишите немного о себе',
+        avatar: 'https://...',
+      }).then((user) => {
+        return res.status(201).send(user);
+      }).catch(next);
+    });
+  }).catch(next);
 };
 
 module.exports.login = (req, res, next) => {
