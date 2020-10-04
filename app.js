@@ -11,7 +11,7 @@ const { usersRouter } = require('./routes');
 const { cardsRouter } = require('./routes');
 const { login, registerUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { authorization } = require('./middlewares/auth');
+const { authorization, protectionRoute } = require('./middlewares/auth');
 
 const app = express();
 app.use(cookieParser());
@@ -35,8 +35,8 @@ app.get('/crash-test', () => {
     throw new Error('Сервер сейчас упадет');
   }, 0);
 });
-app.post('/users/signin', login);
-app.post('/users/signup', registerUser);
+app.post('/signin', protectionRoute, login);
+app.post('/signup', protectionRoute, registerUser);
 app.use('/users', authorization, usersRouter);
 app.use('/cards', authorization, cardsRouter);
 app.use(errorLogger);
@@ -45,7 +45,7 @@ app.get('*', (req, res) => {
 });
 app.disable('etag');
 app.use(errors());
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   return res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
 });

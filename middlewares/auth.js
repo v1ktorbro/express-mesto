@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { celebrate, Joi } = require('celebrate');
 const Unauthorized = require('../errors/Unauthorized');
 
 module.exports.authorization = (req, res, next) => {
@@ -12,3 +13,10 @@ module.exports.authorization = (req, res, next) => {
 module.exports.getUserId = (req) => {
   return jwt.decode(req.cookies.jwt, { complete: true }).payload._id;
 };
+
+module.exports.protectionRoute = celebrate({
+  body: Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  }),
+});
